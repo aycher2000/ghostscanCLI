@@ -73,19 +73,34 @@ def _target_from_nmap_args(args: str) -> str:
     return ""
 
 
-# Nmap XML often uses default namespace; ElementTree requires it in find/findall.
-NMAP_NS = "http://nmap.org/nmap"
+# Nmap XML may use default namespace; we parse by local tag name so we work with or without it.
 
 
-def _ns(root: ET.Element) -> str:
-    """Return namespace prefix for Nmap elements (e.g. '{http://nmap.org/nmap}') or ''."""
-    if root.tag.startswith("{"):
-        return root.tag[: root.tag.index("}") + 1]
-    return ""
+def _local_name(el: ET.Element) -> str:
+    """Return tag local name (no namespace)."""
+    tag = el.tag
+    return tag[tag.index("}") + 1:] if tag.startswith("{") else tag
 
 
-def _tag(ns: str, name: str) -> str:
-    return f"{ns}{name}" if ns else name
+def _find_by_local(parent: ET.Element, local_name: str) -> Optional[ET.Element]:
+    """First direct child with given local name."""
+    for child in parent:
+        if _local_name(child) == local_name:
+            return child
+    return None
+
+
+def _findall_by_local(parent: ET.Element, local_name: str) -> List[ET.Element]:
+    """All direct children with given local name."""
+    return [c for c in parent if _local_name(c) == local_name]
+
+
+def _find_address(parent: ET.Element, addrtype: str) -> Optional[ET.Element]:
+    """First address child with given addrtype (e.g. 'ipv4', 'ipv6', 'mac')."""
+    for child in parent:
+        if _local_name(child) == "address" and child.get("addrtype") == addrtype:
+            return child
+    return None
 
 
 def parse_nmap_xml(xml_path: Path) -> ScanResult:
@@ -101,14 +116,9 @@ def parse_nmap_xml(xml_path: Path) -> ScanResult:
     if root is None:
         raise ValueError("Invalid Nmap XML: empty document")
 
-    ns = _ns(root)
-    # Nmap 7.x XML uses default xmlns; ElementTree requires full QName in find/findall
-
     command_line = _get_attr(root, "args", "")
-    # Finished time from runstats/finished@time (Nmap standard)
-    finished_el = root.find(f"{_tag(ns, 'runstats')}/{_tag(ns, 'finished')}") if ns else root.find("runstats/finished")
-    if finished_el is None and ns:
-        finished_el = root.find("runstats/finished")
+    runstats = _find_by_local(root, "runstats")
+    finished_el = _find_by_local(runstats, "finished") if runstats is not None else None
     end_time = _get_attr(finished_el, "time") if finished_el is not None else ""
     if not end_time:
         end_time = _get_attr(root, "end", "")
@@ -120,11 +130,10 @@ def parse_nmap_xml(xml_path: Path) -> ScanResult:
     )
 
     try:
-        host_els = root.findall(f".//{_tag(ns, 'host')}")
-        if not host_els and ns:
-            host_els = root.findall(".//host")
+        # Collect all host elements (direct children of root; Nmap puts them there)
+        host_els = _findall_by_local(root, "host")
         for host_el in host_els:
-            hr = _parse_host(host_el, ns)
+            hr = _parse_host(host_el)
             result.hosts.append(hr)
     except (KeyError, TypeError, ValueError) as e:
         raise ValueError(f"Error parsing XML host data: {e}") from e
@@ -132,59 +141,52 @@ def parse_nmap_xml(xml_path: Path) -> ScanResult:
     return result
 
 
-def _parse_host(host_el: ET.Element, ns: str = "") -> HostResult:
+def _parse_host(host_el: ET.Element) -> HostResult:
     hr = HostResult()
-    t = lambda n: _tag(ns, n)
 
-    # address (explicit check so IP is parsed correctly)
-    addr_el = host_el.find(f"{t('address')}[@addrtype='ipv4']")
+    # address (explicit: IPv4 then IPv6)
+    addr_el = _find_address(host_el, "ipv4")
     if addr_el is None:
-        addr_el = host_el.find(f"{t('address')}[@addrtype='ipv6']")
+        addr_el = _find_address(host_el, "ipv6")
     if addr_el is not None:
         hr.address = _get_attr(addr_el, "addr")
 
-    # MAC address and vendor (when available, e.g. local network)
-    mac_el = host_el.find(f"{t('address')}[@addrtype='mac']")
+    # MAC
+    mac_el = _find_address(host_el, "mac")
     if mac_el is not None:
         hr.mac_address = _get_attr(mac_el, "addr") or None
         hr.mac_vendor = _get_attr(mac_el, "vendor") or None
 
     # hostnames
-    hostnames_el = host_el.find(t("hostnames"))
+    hostnames_el = _find_by_local(host_el, "hostnames")
     if hostnames_el is not None:
-        hn = hostnames_el.find(t("hostname"))
+        hn = _find_by_local(hostnames_el, "hostname")
         if hn is not None:
             hr.hostname = _get_attr(hn, "name")
 
     # state
-    status_el = host_el.find(t("status"))
+    status_el = _find_by_local(host_el, "status")
     if status_el is not None:
         hr.state = _get_attr(status_el, "state")
 
     # OS
-    os_el = host_el.find(f"{t('os')}/{t('osmatch')}")
-    if os_el is None and ns:
-        os_el = host_el.find("os/osmatch")
-    if os_el is not None:
-        hr.os_match = _get_attr(os_el, "name")
+    os_el = _find_by_local(host_el, "os")
+    osmatch_el = _find_by_local(os_el, "osmatch") if os_el is not None else None
+    if osmatch_el is not None:
+        hr.os_match = _get_attr(osmatch_el, "name")
 
     # ports
-    ports_el = host_el.find(t("ports"))
-    if ports_el is None and ns:
-        ports_el = host_el.find("ports")
+    ports_el = _find_by_local(host_el, "ports")
     if ports_el is not None:
-        for port_el in ports_el.findall(t("port")):
-            if not port_el:
-                continue
-            pi = _parse_port(port_el, ns)
+        for port_el in _findall_by_local(ports_el, "port"):
+            pi = _parse_port(port_el)
             if pi:
                 hr.ports.append(pi)
 
     return hr
 
 
-def _parse_port(port_el: ET.Element, ns: str = "") -> Optional[PortInfo]:
-    t = lambda n: _tag(ns, n)
+def _parse_port(port_el: ET.Element) -> Optional[PortInfo]:
     portid = _get_attr(port_el, "portid")
     protocol = _get_attr(port_el, "protocol", "tcp")
     if not portid:
@@ -194,14 +196,10 @@ def _parse_port(port_el: ET.Element, ns: str = "") -> Optional[PortInfo]:
     except ValueError:
         return None
 
-    state_el = port_el.find(t("state"))
-    if state_el is None and ns:
-        state_el = port_el.find("state")
+    state_el = _find_by_local(port_el, "state")
     state = _get_attr(state_el, "state", "unknown") if state_el is not None else "unknown"
 
-    service_el = port_el.find(t("service"))
-    if service_el is None and ns:
-        service_el = port_el.find("service")
+    service_el = _find_by_local(port_el, "service")
     service = product = version = extrainfo = None
     if service_el is not None:
         service = _get_attr(service_el, "name") or None
@@ -210,7 +208,7 @@ def _parse_port(port_el: ET.Element, ns: str = "") -> Optional[PortInfo]:
         extrainfo = _get_attr(service_el, "extrainfo") or None
 
     script_output: Optional[Dict[str, str]] = None
-    for script_el in port_el.findall(t("script")):
+    for script_el in _findall_by_local(port_el, "script"):
         sid = _get_attr(script_el, "id")
         out = (script_el.get("output") or "").strip()
         if sid:
