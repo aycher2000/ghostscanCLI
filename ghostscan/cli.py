@@ -41,8 +41,8 @@ def _run_and_report(
         raise typer.Exit(1)
     if getattr(scan_def, "requires_root", False):
         print_info(
-            "[yellow]Note: Root/sudo may be required for this scan to work. "
-            "If you get permission errors, run: sudo ghostscan os <target>[/yellow]"
+            "[yellow]Note: This scan may require sudo depending on the environment. "
+            "If you get permission errors (e.g. opening wlan0), try running with sudo.[/yellow]"
         )
     print_info(f"Running {scan_def.name} against {target}...")
     try:
@@ -78,7 +78,7 @@ def _run_and_report(
 def discover(
     target: str = typer.Argument(..., callback=_target_callback, help="IP, hostname, or CIDR (e.g. 192.168.1.0/24)"),
 ) -> None:
-    """Find live hosts (no port scan). Low visibility."""
+    """Find live hosts (no port scan). May require sudo depending on environment."""
     _run_and_report(target, "discover")
 
 
@@ -86,7 +86,7 @@ def discover(
 def quick(
     target: str = typer.Argument(..., callback=_target_callback, help="Single IP or hostname"),
 ) -> None:
-    """Quick scan of common ports. Moderate visibility."""
+    """Quick scan of common ports (-Pn -sT). Designed to work without sudo."""
     _run_and_report(target, "quick")
 
 
@@ -94,7 +94,7 @@ def quick(
 def full(
     target: str = typer.Argument(..., callback=_target_callback, help="Single IP or hostname"),
 ) -> None:
-    """Scan all 65535 ports. High visibility."""
+    """Scan all 65535 ports (-Pn -sT). Designed to work without sudo."""
     _run_and_report(target, "full")
 
 
@@ -102,19 +102,19 @@ def full(
 def service(
     target: str = typer.Argument(..., callback=_target_callback, help="Single IP or hostname"),
 ) -> None:
-    """Detect service and version on open ports. Moderate visibility."""
+    """Detect service and version on open ports (-Pn -sT). Designed to work without sudo."""
     _run_and_report(target, "service")
 
 
 @app.command()
 def os(
-    target: str = typer.Argument(..., callback=_target_callback, help="Single IP or hostname (root required)"),
+    target: str = typer.Argument(..., callback=_target_callback, help="Single IP or hostname"),
 ) -> None:
-    """Guess operating system. High visibility; often requires root."""
+    """Guess operating system. May require sudo depending on environment."""
     _run_and_report(target, "os")
 
 
-profile_app = typer.Typer(help="Pre-built scan profiles (web, smb, ...).")
+profile_app = typer.Typer(help="Pre-built scan profiles (web, smb); work without sudo.")
 app.add_typer(profile_app, name="profile")
 
 
@@ -122,7 +122,7 @@ app.add_typer(profile_app, name="profile")
 def profile_web(
     target: str = typer.Argument(..., callback=_target_callback, help="Single IP or hostname"),
 ) -> None:
-    """Web ports and HTTP scripts. Moderate visibility."""
+    """Web ports and HTTP scripts (-Pn -sT). Designed to work without sudo."""
     _run_and_report(target, "profile:web")
 
 
@@ -130,7 +130,7 @@ def profile_web(
 def profile_smb(
     target: str = typer.Argument(..., callback=_target_callback, help="Single IP or hostname"),
 ) -> None:
-    """SMB ports and enumeration scripts. Moderate visibility."""
+    """SMB ports and enumeration scripts (-Pn -sT). Designed to work without sudo."""
     _run_and_report(target, "profile:smb")
 
 

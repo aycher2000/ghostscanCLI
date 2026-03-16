@@ -39,27 +39,27 @@ SCAN_DEFS = {
     "discover": ScanDef(
         name="Host discovery",
         args=["-sn"],
-        description="Ping and probe to find live hosts (no port scan).",
+        description="Ping and probe to find live hosts (no port scan). May require sudo depending on environment.",
         visibility="Smaller network footprint; may still be logged on filtered networks.",
         when_to_use="First step on a new network to find live hosts before port scanning.",
         next_step="Run 'ghostscan quick <ip>' on interesting hosts.",
-        requires_root=False,
+        requires_root=True,  # -sn often needs raw sockets (e.g. wlan0); may work with sudo
         works_without_root=True,
     ),
     "quick": ScanDef(
         name="Quick TCP connect",
-        args=["-T4", "-F"],
-        description="Fast scan of common ports using TCP connect.",
+        args=["-Pn", "-sT", "-T4", "-F"],
+        description="Fast scan of common ports using TCP connect. Designed to work without sudo.",
         visibility="Larger network footprint; full TCP handshakes are more likely to be logged.",
-        when_to_use="After discovery to see which common ports are open on a host.",
+        when_to_use="After discovery (or when you know the host is up). Skips host discovery; no raw sockets.",
         next_step="Run 'ghostscan service <ip>' for version detection on open ports.",
         requires_root=False,
         works_without_root=True,
     ),
     "full": ScanDef(
         name="Full port scan",
-        args=["-T4", "-p-"],
-        description="Scan all 65535 ports (slower).",
+        args=["-Pn", "-sT", "-T4", "-p-"],
+        description="Scan all 65535 ports (slower). Designed to work without sudo.",
         visibility="Large network footprint; many connections, more likely to be logged and flagged by IDS.",
         when_to_use="When quick scan missed services or you need a complete port list.",
         next_step="Run 'ghostscan service <ip>' or profile scans on discovered ports.",
@@ -68,8 +68,8 @@ SCAN_DEFS = {
     ),
     "service": ScanDef(
         name="Service/version detection",
-        args=["-sV", "-T4", "--version-intensity", "5"],
-        description="Probe open ports to detect service and version.",
+        args=["-Pn", "-sT", "-sV", "-T4", "--version-intensity", "5"],
+        description="Probe open ports to detect service and version. Designed to work without sudo.",
         visibility="Moderate footprint; extra probes are more likely to be logged.",
         when_to_use="After finding open ports to identify what is running.",
         next_step="Use profile scans (web, smb) or 'ghostscan os <ip>' for OS guess.",
@@ -79,23 +79,24 @@ SCAN_DEFS = {
     "os": ScanDef(
         name="OS fingerprinting",
         args=["-O", "--osscan-guess", "-T4"],
-        description="Guess operating system from stack behavior.",
+        description="Guess operating system from stack behavior. May require sudo depending on environment.",
         visibility="Larger network footprint; unusual packets are more likely to be logged and flagged.",
         when_to_use="When you need to identify the OS.",
         next_step="Combine with service and profile results for full picture.",
         requires_root=True,
         works_without_root=False,  # -O typically needs raw packets; run with sudo for results
     ),
-    # NSE scripts below confirmed available on Kali 2026.1 (http-*, smb-*)
+    # NSE scripts below confirmed available on Kali 2026.1 (http-*, smb-*). -Pn -sT for no-root use.
     "profile:web": ScanDef(
         name="Web enumeration profile",
         args=[
+            "-Pn", "-sT",
             "-p", "80,443,8080,8443,8000",
             "-sV",
             "--script", "http-title,http-server-header,http-methods",
             "-T4",
         ],
-        description="Target web ports and basic HTTP scripts.",
+        description="Target web ports and basic HTTP scripts. Designed to work without sudo.",
         visibility="Moderate footprint; HTTP traffic is normal for web servers but may be logged.",
         when_to_use="When you see open web ports (80, 443, 8080, etc.).",
         next_step="Manual HTTP probing or further NSE scripts as needed.",
@@ -105,12 +106,13 @@ SCAN_DEFS = {
     "profile:smb": ScanDef(
         name="SMB enumeration profile",
         args=[
+            "-Pn", "-sT",
             "-p", "139,445",
             "-sV",
             "--script", "smb-os-discovery,smb2-capabilities,smb-security-mode",  # confirmed on Kali
             "-T4",
         ],
-        description="Target SMB ports and safe enumeration scripts.",
+        description="Target SMB ports and safe enumeration scripts. Designed to work without sudo.",
         visibility="Moderate footprint; SMB probes are more likely to be logged.",
         when_to_use="When you see open 139/445 (Windows or Samba).",
         next_step="Further SMB scripts or credential testing if authorized.",

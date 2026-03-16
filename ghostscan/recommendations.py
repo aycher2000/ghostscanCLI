@@ -29,13 +29,13 @@ def explain_scan(scan_type: str) -> bool:
     # Privilege: warn, never block
     if getattr(d, "requires_root", False):
         if getattr(d, "works_without_root", True):
-            parts.append("\n[yellow]Recommended with sudo for best results.[/yellow]")
+            parts.append("\n[yellow]May require sudo depending on the environment (e.g. raw sockets on wlan0).[/yellow]")
         else:
             parts.append(
-                "\n[yellow]Recommended with sudo; this scan may not work or may be limited without root.[/yellow]"
+                "\n[yellow]May require sudo depending on the environment; this scan typically needs root to work.[/yellow]"
             )
     else:
-        parts.append("\n[dim]Runs without root.[/dim]")
+        parts.append("\n[dim]Designed to work without sudo (uses -Pn -sT to avoid raw sockets).[/dim]")
     console.print(Panel("\n".join(parts), title="Scan explanation"))
     return True
 
@@ -46,12 +46,12 @@ def recommend_general() -> None:
     table.add_column("Step", style="cyan")
     table.add_column("Command", style="green")
     table.add_column("When to use", style="white")
-    table.add_row("1", "ghostscan discover <range>", "Find live hosts on a network (e.g. 192.168.1.0/24)")
-    table.add_row("2", "ghostscan quick <ip>", "Quick check of common ports on a single host")
-    table.add_row("3", "ghostscan service <ip>", "Identify services and versions on open ports")
-    table.add_row("4", "ghostscan os <ip>", "Guess OS (run with sudo for best results)")
-    table.add_row("—", "ghostscan profile web <ip>", "Focus on web ports and HTTP info")
-    table.add_row("—", "ghostscan profile smb <ip>", "Focus on SMB and Windows-related info")
+    table.add_row("1", "ghostscan discover <range>", "Find live hosts (may require sudo depending on env)")
+    table.add_row("2", "ghostscan quick <ip>", "Quick common ports; works without sudo (-Pn -sT)")
+    table.add_row("3", "ghostscan service <ip>", "Service/version detection; works without sudo")
+    table.add_row("4", "ghostscan os <ip>", "OS fingerprint (may require sudo depending on env)")
+    table.add_row("—", "ghostscan profile web <ip>", "Web ports + HTTP scripts; works without sudo")
+    table.add_row("—", "ghostscan profile smb <ip>", "SMB ports + scripts; works without sudo")
     table.add_row("", "ghostscan next latest", "Get next steps from your last scan (or use results/latest.json)")
     console.print(table)
 
