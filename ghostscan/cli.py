@@ -277,18 +277,27 @@ def map_cmd(
     else:
         inventory = parse_nmap_xml(xml_s)
     from rich.table import Table
-    table = Table(title="Discovered hosts", show_header=True, header_style="bold")
-    table.add_column("Address", style="cyan")
-    table.add_column("Hostname", style="green")
-    table.add_column("Open ports / services", style="white")
-    for h in inventory.hosts:
-        addr = h.address or "?"
-        name = h.hostname or ""
-        ports_svc = ", ".join(f"{p.port}({p.service or '?'})" for p in sorted(h.ports, key=lambda x: x.port)[:15])
-        if not ports_svc:
-            ports_svc = "(none)"
-        table.add_row(addr, name, ports_svc)
-    console.print(table)
+    # Build table from parsed inventory (one row per host with address)
+    rows_hosts = [h for h in inventory.hosts if h.address]
+    if not rows_hosts:
+        print_error("No hosts in scan output. Check that quick/service XML was parsed (Nmap may use XML namespace).")
+        print_scan_summary(inventory, title="Raw parsed result")
+    else:
+        table = Table(title="Discovered hosts", show_header=True, header_style="bold")
+        table.add_column("Address", style="cyan")
+        table.add_column("Hostname", style="green")
+        table.add_column("Open ports / services", style="white")
+        for h in rows_hosts:
+            addr = h.address or "?"
+            name = h.hostname or ""
+            open_ports = [p for p in h.ports if p.state and p.state.lower() == "open"]
+            ports_svc = ", ".join(
+                f"{p.port}({p.service or '?'})" for p in sorted(open_ports, key=lambda x: x.port)[:15]
+            )
+            if not ports_svc:
+                ports_svc = "(none)"
+            table.add_row(addr, name, ports_svc)
+        console.print(table)
     export_json(inventory, RESULTS_DIR / "map_latest.json", scan_type="map")
     record_scan(target, "map")
     print_success("Network map complete.")
