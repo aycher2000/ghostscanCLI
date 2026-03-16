@@ -86,11 +86,16 @@ def parse_nmap_xml(xml_path: Path) -> ScanResult:
         raise ValueError("Invalid Nmap XML: empty document")
 
     command_line = _get_attr(root, "args", "")
+    # Finished time from runstats/finished@time (Nmap standard)
+    finished_el = root.find("runstats/finished")
+    end_time = _get_attr(finished_el, "time") if finished_el is not None else ""
+    if not end_time:
+        end_time = _get_attr(root, "end", "")
     result = ScanResult(
         command_line=command_line,
         target=_target_from_nmap_args(command_line),
         start_time=_get_attr(root, "start"),
-        end_time=_get_attr(root, "end"),
+        end_time=end_time or None,
     )
 
     try:
@@ -106,8 +111,10 @@ def parse_nmap_xml(xml_path: Path) -> ScanResult:
 def _parse_host(host_el: ET.Element) -> HostResult:
     hr = HostResult()
 
-    # address
-    addr_el = host_el.find("address[@addrtype='ipv4']") or host_el.find("address[@addrtype='ipv6']")
+    # address (explicit check so IP is parsed correctly)
+    addr_el = host_el.find("address[@addrtype='ipv4']")
+    if addr_el is None:
+        addr_el = host_el.find("address[@addrtype='ipv6']")
     if addr_el is not None:
         hr.address = _get_attr(addr_el, "addr")
 
