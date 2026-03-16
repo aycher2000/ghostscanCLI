@@ -16,6 +16,7 @@ class PortInfo:
     product: Optional[str] = None
     version: Optional[str] = None
     extrainfo: Optional[str] = None
+    script_output: Optional[Dict[str, str]] = None  # e.g. {"http-title": "...", "http-server-header": "..."}
 
 
 @dataclass
@@ -173,6 +174,15 @@ def _parse_port(port_el: ET.Element) -> Optional[PortInfo]:
         version = _get_attr(service_el, "version") or None
         extrainfo = _get_attr(service_el, "extrainfo") or None
 
+    script_output: Optional[Dict[str, str]] = None
+    for script_el in port_el.findall("script"):
+        sid = _get_attr(script_el, "id")
+        out = (script_el.get("output") or "").strip()
+        if sid:
+            if script_output is None:
+                script_output = {}
+            script_output[sid] = out
+
     return PortInfo(
         port=port,
         protocol=protocol,
@@ -181,6 +191,7 @@ def _parse_port(port_el: ET.Element) -> Optional[PortInfo]:
         product=product,
         version=version,
         extrainfo=extrainfo,
+        script_output=script_output,
     )
 
 
@@ -216,6 +227,9 @@ def load_result_from_json(json_path: Path) -> ScanResult:
                 continue
             if port_num < 0 or port_num > 65535:
                 continue
+            so = p.get("script_output")
+            if not isinstance(so, dict):
+                so = None
             port_list.append(
                 PortInfo(
                     port=port_num,
@@ -225,6 +239,7 @@ def load_result_from_json(json_path: Path) -> ScanResult:
                     product=p.get("product"),
                     version=p.get("version"),
                     extrainfo=p.get("extrainfo"),
+                    script_output=so,
                 )
             )
         hosts.append(

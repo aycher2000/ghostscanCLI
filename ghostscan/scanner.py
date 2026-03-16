@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from ghostscan.config import RESULTS_DIR
+from ghostscan.runtime import ensure_results_dir_ok
 
 
 def _sanitize_filename_part(s: str) -> str:
@@ -119,6 +120,16 @@ SCAN_DEFS = {
         requires_root=False,
         works_without_root=True,
     ),
+    "vuln": ScanDef(
+        name="Vulnerability scan",
+        args=["-Pn", "-sT", "--script", "vuln", "-T4"],
+        description="Run NSE vuln scripts against open ports. Highlights potential vulnerabilities.",
+        visibility="Large footprint; aggressive probing, likely to be logged.",
+        when_to_use="After identifying services; only on authorized targets.",
+        next_step="Review findings and validate manually; consider vendor advisories.",
+        requires_root=False,
+        works_without_root=True,
+    ),
 }
 
 
@@ -165,7 +176,7 @@ def run_scan(
     """
     results_dir = results_dir or RESULTS_DIR
     results_dir = Path(results_dir)
-    results_dir.mkdir(parents=True, exist_ok=True)
+    ensure_results_dir_ok(results_dir)
 
     scan_def = get_scan_def(scan_type)
     if not scan_def:

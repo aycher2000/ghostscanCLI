@@ -53,3 +53,18 @@ def validate_target(target: str) -> Optional[str]:
         "Invalid target. Use a single IP (e.g. 192.168.1.10), "
         "a hostname (e.g. example.com), or a CIDR range (e.g. 192.168.1.0/24)."
     )
+
+
+def validate_target_list(target_list_str: str) -> Optional[str]:
+    """
+    Validate a space-separated list of targets (IPs or hostnames).
+    Returns None if all valid, or an error message if any invalid.
+    """
+    parts = (target_list_str or "").strip().split()
+    if not parts:
+        return "Target list cannot be empty."
+    for t in parts:
+        err = validate_target(t)
+        if err:
+            return f"Invalid target '{t}': {err}"
+    return None

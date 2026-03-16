@@ -52,7 +52,10 @@ def recommend_general() -> None:
     table.add_row("4", "ghostscan os <ip>", "OS fingerprint (may require sudo depending on env)")
     table.add_row("—", "ghostscan profile web <ip>", "Web ports + HTTP scripts; works without sudo")
     table.add_row("—", "ghostscan profile smb <ip>", "SMB ports + scripts; works without sudo")
-    table.add_row("", "ghostscan next latest", "Get next steps from your last scan (or use results/latest.json)")
+    table.add_row("—", "ghostscan vuln <ip>", "Vulnerability scan (NSE vuln); authorized targets only")
+    table.add_row("", "ghostscan recon <ip>", "Automated chain: quick → service → web if detected")
+    table.add_row("", "ghostscan map <cidr>", "Discover hosts, then quick + service; network inventory")
+    table.add_row("", "ghostscan next latest", "Get next steps from your last scan")
     console.print(table)
 
 
@@ -64,27 +67,47 @@ def _has_port(host: HostResult, port: int) -> bool:
     return any(p.port == port for p in _open_ports(host))
 
 
+# Well-known ports for smart recommendations
+WEB_PORTS = {80, 443, 8080, 8443, 8000}
+SMB_PORTS = {139, 445}
+SSH_PORT = 22
+DB_PORTS = {3306, 5432, 27017, 1433, 1521}  # MySQL, PostgreSQL, MongoDB, MSSQL, Oracle
+
+
+def _port_set(host: HostResult) -> set:
+    return {p.port for p in _open_ports(host)}
+
+
+def has_web_ports(host: HostResult) -> bool:
+    """True if host has common web ports open."""
+    return bool(_port_set(host) & WEB_PORTS)
+
+
 def _next_steps_from_result(result: ScanResult) -> List[str]:
     """Generate contextual next-step recommendations from a ScanResult (per-host)."""
     steps: List[str] = []
     for host in result.hosts:
         addr = host.address or "this host"
         open_ports = _open_ports(host)
+        port_set = _port_set(host)
         host_steps: List[str] = []
         if not open_ports:
             host_steps.append(f"Host {addr}: No open ports in this scan. Try 'ghostscan full {addr}' for all ports.")
         else:
-            port_set = {p.port for p in open_ports}
-            if 80 in port_set or 443 in port_set or 8080 in port_set or 8443 in port_set:
+            if port_set & WEB_PORTS:
                 host_steps.append(f"Host {addr}: Web ports open. Run 'ghostscan profile web {addr}' for HTTP details.")
-            if 139 in port_set or 445 in port_set:
+            if port_set & SMB_PORTS:
                 host_steps.append(f"Host {addr}: SMB ports open. Run 'ghostscan profile smb {addr}' for SMB enumeration.")
+            if SSH_PORT in port_set:
+                host_steps.append(f"Host {addr}: SSH (22) detected. Consider key-based auth or 'ghostscan vuln {addr}' if authorized.")
+            if port_set & DB_PORTS:
+                host_steps.append(f"Host {addr}: Database port(s) open. Run 'ghostscan service {addr}' for version; test only if authorized.")
             if not host.os_match:
-                host_steps.append(f"Host {addr}: OS unknown. Run 'ghostscan os {addr}' (requires root) for OS fingerprint.")
+                host_steps.append(f"Host {addr}: OS unknown. Run 'ghostscan os {addr}' (may need sudo) for OS fingerprint.")
             if not host_steps:
                 host_steps.append(f"Host {addr}: Run 'ghostscan service {addr}' for service/version detection on open ports.")
         steps.extend(host_steps)
-    return steps[:15]  # cap for readability
+    return steps[:20]  # cap for readability
 
 
 def _resolve_results_path(results_path: str) -> Path:

@@ -63,6 +63,13 @@ def print_scan_summary(result: ScanResult, title: Optional[str] = None) -> None:
                     svc += f" ({p.extrainfo})"
                 table.add_row(str(p.port), p.state, svc or "-")
             console.print(table)
+            # Technology fingerprinting: script output (http-title, http-server-header, etc.)
+            for p in sorted(host.ports, key=lambda x: (x.port, x.protocol)):
+                if getattr(p, "script_output", None):
+                    for key, val in p.script_output.items():
+                        if val and key in ("http-title", "http-server-header", "http-methods"):
+                            label = key.replace("http-", "").replace("-", " ").title()
+                            console.print(f"  [dim]{label} (port {p.port}):[/dim] {val[:80]}{'...' if len(val) > 80 else ''}")
         else:
             console.print("  [dim]No port data.[/dim]")
 
