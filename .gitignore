@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+.venv/
+
+# Packaging
+*.egg-info/
+
+# Scan results
+results/
+
+# OS junk
+.DS_Store
+
+# Editor
+.vscode/
