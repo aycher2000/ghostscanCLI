@@ -1,0 +1,8 @@
+{
+  "scan_type": "map",
+  "target": "192.168.8.77\"",
+  "command_line": "/usr/lib/nmap/nmap -oX results/map_service_192.168.8.0_24.xml -Pn -sT -sV -T4 --version-intensity 5 \"192.168.8.1 192.168.8.10 192.168.8.50 192.168.8.104 192.168.8.120 192.168.8.151 192.168.8.220 192.168.8.77\"",
+  "start_time": "1773641843",
+  "end_time": "1773641843",
+  "hosts": []
+}

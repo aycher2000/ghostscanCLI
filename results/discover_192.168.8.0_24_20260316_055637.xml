@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<?xml-stylesheet href="file:///usr/share/nmap/nmap.xsl" type="text/xsl"?>
+<!-- Nmap 7.98 scan initiated Sun Mar 15 22:56:37 2026 as: /usr/lib/nmap/nmap -&#45;privileged -oX results/discover_192.168.8.0_24_20260316_055637.xml -sn 192.168.8.0/24 -->
+<nmaprun scanner="nmap" args="/usr/lib/nmap/nmap -&#45;privileged -oX results/discover_192.168.8.0_24_20260316_055637.xml -sn 192.168.8.0/24" start="1773640597" startstr="Sun Mar 15 22:56:37 2026" version="7.98" xmloutputversion="1.05">
+<verbose level="0"/>
+<debugging level="0"/>
+<runstats><finished time="1773640597" timestr="Sun Mar 15 22:56:37 2026" summary="Nmap done at Sun Mar 15 22:56:37 2026; 0 IP addresses (0 hosts up) scanned in 0.02 seconds" elapsed="0.02" exit="error" errormsg="Couldn&apos;t open a raw socket or eth handle."/><hosts up="0" down="0" total="0"/>
+</runstats>
+</nmaprun>

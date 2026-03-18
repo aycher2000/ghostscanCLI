@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<?xml-stylesheet href="file:///usr/share/nmap/nmap.xsl" type="text/xsl"?>
+<!-- Nmap 7.98 scan initiated Sun Mar 15 22:43:44 2026 as: /usr/lib/nmap/nmap -&#45;privileged -oX results/profile_web_scanme.nmap.org_20260316_054344.xml -Pn -sT -p 80,443,8080,8443,8000 -sV -&#45;script http-title,http-server-header,http-methods -T4 scanme.nmap.org -->
+<nmaprun scanner="nmap" args="/usr/lib/nmap/nmap -&#45;privileged -oX results/profile_web_scanme.nmap.org_20260316_054344.xml -Pn -sT -p 80,443,8080,8443,8000 -sV -&#45;script http-title,http-server-header,http-methods -T4 scanme.nmap.org" start="1773639824" startstr="Sun Mar 15 22:43:44 2026" version="7.98" xmloutputversion="1.05">
+<scaninfo type="connect" protocol="tcp" numservices="5" services="80,443,8000,8080,8443"/>
+<verbose level="0"/>
+<debugging level="0"/>
+<host starttime="1773639824" endtime="1773639831"><status state="up" reason="user-set" reason_ttl="0"/>
+<address addr="45.33.32.156" addrtype="ipv4"/>
+<hostnames>
+<hostname name="scanme.nmap.org" type="user"/>
+<hostname name="scanme.nmap.org" type="PTR"/>
+</hostnames>
+<ports><port protocol="tcp" portid="80"><state state="open" reason="syn-ack" reason_ttl="0"/><service name="http" product="Apache httpd" version="2.4.7" extrainfo="(Ubuntu)" method="probed" conf="10"><cpe>cpe:/a:apache:http_server:2.4.7</cpe></service><script id="http-server-header" output="Apache/2.4.7 (Ubuntu)"><elem>Apache/2.4.7 (Ubuntu)</elem>
+</script><script id="http-methods" output="&#xa;  Supported Methods: GET HEAD POST OPTIONS"><table key="Supported Methods">
+<elem>GET</elem>
+<elem>HEAD</elem>
+<elem>POST</elem>
+<elem>OPTIONS</elem>
+</table>
+</script><script id="http-title" output="Go ahead and ScanMe!"><elem key="title">Go ahead and ScanMe!</elem>
+</script></port>
+<port protocol="tcp" portid="443"><state state="closed" reason="conn-refused" reason_ttl="0"/><service name="https" method="table" conf="3"/></port>
+<port protocol="tcp" portid="8000"><state state="closed" reason="conn-refused" reason_ttl="0"/><service name="http-alt" method="table" conf="3"/></port>
+<port protocol="tcp" portid="8080"><state state="closed" reason="conn-refused" reason_ttl="0"/><service name="http-proxy" method="table" conf="3"/></port>
+<port protocol="tcp" portid="8443"><state state="closed" reason="conn-refused" reason_ttl="0"/><service name="https-alt" method="table" conf="3"/></port>
+</ports>
+<times srtt="25785" rttvar="11534" to="100000"/>
+</host>
+<runstats><finished time="1773639831" timestr="Sun Mar 15 22:43:51 2026" summary="Nmap done at Sun Mar 15 22:43:51 2026; 1 IP address (1 host up) scanned in 7.23 seconds" elapsed="7.23" exit="success"/><hosts up="1" down="0" total="1"/>
+</runstats>
+</nmaprun>

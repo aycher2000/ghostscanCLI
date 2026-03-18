@@ -1,0 +1,81 @@
+{
+  "scan_type": "discover",
+  "target": "192.168.8.0/24",
+  "command_line": "/usr/lib/nmap/nmap -oX results/discover_192.168.8.0_24_20260318_152637.xml -sn 192.168.8.0/24",
+  "start_time": "1773847597",
+  "end_time": "1773847600",
+  "hosts": [
+    {
+      "address": "192.168.8.1",
+      "hostname": null,
+      "state": "up",
+      "os_match": null,
+      "mac_address": "94:83:C4:A9:67:B9",
+      "mac_vendor": "GL Technologies (Hong Kong) Limited",
+      "ports": []
+    },
+    {
+      "address": "192.168.8.10",
+      "hostname": null,
+      "state": "up",
+      "os_match": null,
+      "mac_address": "D0:11:E5:D6:F9:13",
+      "mac_vendor": "Apple",
+      "ports": []
+    },
+    {
+      "address": "192.168.8.50",
+      "hostname": null,
+      "state": "up",
+      "os_match": null,
+      "mac_address": "98:EE:CB:7F:F4:EE",
+      "mac_vendor": "Wistron Infocomm (Zhongshan)",
+      "ports": []
+    },
+    {
+      "address": "192.168.8.104",
+      "hostname": null,
+      "state": "up",
+      "os_match": null,
+      "mac_address": "5A:AE:C8:BD:CF:82",
+      "mac_vendor": null,
+      "ports": []
+    },
+    {
+      "address": "192.168.8.120",
+      "hostname": null,
+      "state": "up",
+      "os_match": null,
+      "mac_address": "E8:38:A0:67:A8:BF",
+      "mac_vendor": "Vizio",
+      "ports": []
+    },
+    {
+      "address": "192.168.8.151",
+      "hostname": null,
+      "state": "up",
+      "os_match": null,
+      "mac_address": "74:D0:2B:9E:16:83",
+      "mac_vendor": "ASUSTek Computer",
+      "ports": []
+    },
+    {
+      "address": "192.168.8.220",
+      "hostname": null,
+      "state": "up",
+      "os_match": null,
+      "mac_address": "DC:CD:2F:9E:B5:D7",
+      "mac_vendor": "Seiko Epson",
+      "ports": []
+    },
+    {
+      "address": "192.168.8.77",
+      "hostname": null,
+      "state": "up",
+      "os_match": null,
+      "mac_address": null,
+      "mac_vendor": null,
+      "ports": []
+    }
+  ]
+}

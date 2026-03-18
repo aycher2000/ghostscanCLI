@@ -1,0 +1,64 @@
+{
+  "scan_type": "vuln",
+  "target": "scanme.nmap.org",
+  "command_line": "/usr/lib/nmap/nmap --privileged -oX results/vuln_scanme.nmap.org_20260316_054410.xml -Pn -sT --script vuln -T4 scanme.nmap.org",
+  "start_time": "1773639850",
+  "end_time": "1773640162",
+  "hosts": [
+    {
+      "address": "45.33.32.156",
+      "hostname": "scanme.nmap.org",
+      "state": "up",
+      "os_match": null,
+      "mac_address": null,
+      "mac_vendor": null,
+      "ports": [
+        {
+          "port": 22,
+          "protocol": "tcp",
+          "state": "open",
+          "service": "ssh",
+          "product": null,
+          "version": null,
+          "extrainfo": null,
+          "script_output": null
+        },
+        {
+          "port": 80,
+          "protocol": "tcp",
+          "state": "open",
+          "service": "http",
+          "product": null,
+          "version": null,
+          "extrainfo": null,
+          "script_output": {
+            "http-stored-xss": "Couldn't find any stored XSS vulnerabilities.",
+            "http-csrf": "Spidering limited to: maxdepth=3; maxpagecount=20; withinhost=scanme.nmap.org\n  Found the following possible CSRF vulnerabilities: \n    \n    Path: http://scanme.nmap.org:80/\n    Form id: nst-head-search\n    Form action: /search/\n    \n    Path: http://scanme.nmap.org:80/\n    Form id: nst-foot-search\n    Form action: /search/",
+            "http-dombased-xss": "Couldn't find any DOM based XSS.",
+            "http-enum": "/images/: Potentially interesting directory w/ listing on 'apache/2.4.7 (ubuntu)'"
+          }
+        },
+        {
+          "port": 9929,
+          "protocol": "tcp",
+          "state": "open",
+          "service": "nping-echo",
+          "product": null,
+          "version": null,
+          "extrainfo": null,
+          "script_output": null
+        },
+        {
+          "port": 31337,
+          "protocol": "tcp",
+          "state": "open",
+          "service": "Elite",
+          "product": null,
+          "version": null,
+          "extrainfo": null,
+          "script_output": null
+        }
+      ]
+    }
+  ]
+}

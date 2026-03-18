@@ -1,0 +1,18 @@
+{
+  "scan_type": "discover",
+  "target": "scanme.nmap.org",
+  "command_line": "/usr/lib/nmap/nmap -oX results/discover_scanme.nmap.org_20260316_041126.xml -sn scanme.nmap.org",
+  "start_time": "1773634286",
+  "end_time": "",
+  "hosts": [
+    {
+      "address": null,
+      "hostname": "scanme.nmap.org",
+      "state": "up",
+      "os_match": null,
+      "mac_address": null,
+      "mac_vendor": null,
+      "ports": []
+    }
+  ]
+}

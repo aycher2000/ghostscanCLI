@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<?xml-stylesheet href="file:///usr/share/nmap/nmap.xsl" type="text/xsl"?>
+<!-- Nmap 7.98 scan initiated Sun Mar 15 21:11:26 2026 as: /usr/lib/nmap/nmap -oX results/discover_scanme.nmap.org_20260316_041126.xml -sn scanme.nmap.org -->
+<nmaprun scanner="nmap" args="/usr/lib/nmap/nmap -oX results/discover_scanme.nmap.org_20260316_041126.xml -sn scanme.nmap.org" start="1773634286" startstr="Sun Mar 15 21:11:26 2026" version="7.98" xmloutputversion="1.05">
+<verbose level="0"/>
+<debugging level="0"/>
+<host><status state="up" reason="reset" reason_ttl="53"/>
+<address addr="45.33.32.156" addrtype="ipv4"/>
+<hostnames>
+<hostname name="scanme.nmap.org" type="user"/>
+<hostname name="scanme.nmap.org" type="PTR"/>
+</hostnames>
+<times srtt="30138" rttvar="30138" to="150690"/>
+</host>
+<runstats><finished time="1773634286" timestr="Sun Mar 15 21:11:26 2026" summary="Nmap done at Sun Mar 15 21:11:26 2026; 1 IP address (1 host up) scanned in 0.34 seconds" elapsed="0.34" exit="success"/><hosts up="1" down="0" total="1"/>
+</runstats>
+</nmaprun>

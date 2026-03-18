@@ -1,0 +1,73 @@
+{
+  "scan_type": "profile:web",
+  "target": "scanme.nmap.org",
+  "command_line": "/usr/lib/nmap/nmap --privileged -oX results/profile_web_scanme.nmap.org_20260316_055227.xml -Pn -sT -p 80,443,8080,8443,8000 -sV --script http-title,http-server-header,http-methods -T4 scanme.nmap.org",
+  "start_time": "1773640347",
+  "end_time": "1773640354",
+  "hosts": [
+    {
+      "address": "45.33.32.156",
+      "hostname": "scanme.nmap.org",
+      "state": "up",
+      "os_match": null,
+      "mac_address": null,
+      "mac_vendor": null,
+      "ports": [
+        {
+          "port": 80,
+          "protocol": "tcp",
+          "state": "open",
+          "service": "http",
+          "product": "Apache httpd",
+          "version": "2.4.7",
+          "extrainfo": "(Ubuntu)",
+          "script_output": {
+            "http-methods": "Supported Methods: GET HEAD POST OPTIONS",
+            "http-title": "Go ahead and ScanMe!",
+            "http-server-header": "Apache/2.4.7 (Ubuntu)"
+          }
+        },
+        {
+          "port": 443,
+          "protocol": "tcp",
+          "state": "closed",
+          "service": "https",
+          "product": null,
+          "version": null,
+          "extrainfo": null,
+          "script_output": null
+        },
+        {
+          "port": 8000,
+          "protocol": "tcp",
+          "state": "closed",
+          "service": "http-alt",
+          "product": null,
+          "version": null,
+          "extrainfo": null,
+          "script_output": null
+        },
+        {
+          "port": 8080,
+          "protocol": "tcp",
+          "state": "closed",
+          "service": "http-proxy",
+          "product": null,
+          "version": null,
+          "extrainfo": null,
+          "script_output": null
+        },
+        {
+          "port": 8443,
+          "protocol": "tcp",
+          "state": "closed",
+          "service": "https-alt",
+          "product": null,
+          "version": null,
+          "extrainfo": null,
+          "script_output": null
+        }
+      ]
+    }
+  ]
+}
